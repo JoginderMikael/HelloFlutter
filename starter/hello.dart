@@ -15,4 +15,22 @@ void main(){
   }
 
   print(a>5 ? 'a is greater than 5' : 'a is less than or equal to 5');
+
+  String name = 'Joginder'; // String interpolation
+  var name1 = 'Joginder'; // Type inference
+  var x = 32;
+  dynamic y = 32; // Dynamic type
+
+  const String name2 = 'Joginder'; // Constant variable
+  final String name3 = 'Joginder'; // Final variable
+
+  var myName;
+  print(myName); // null
+
+  myName = 'Joginder';
+  print(myName); // Joginder
+
+  
+
+
 }
