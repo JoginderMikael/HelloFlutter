@@ -1,10 +1,8 @@
 void main(){
-  //Classes. person class
-  Person person1 = Person("John", 25, "Male");
+  //Classes. person class without initialization in constructor
+  Person person1 = Person();
+  person1.addData("John", 25, "Male");
   person1.display();
-  Person person2 = Person("Jane", 30, "Female");
-  person2.display();
-
   
 }
 
@@ -13,8 +11,8 @@ class Person{
   String? name, sex;
   int? age;
 
-  //constructor
-  Person(String name, int age, String sex){
+  //Method
+  void addData(String name, int age, String sex){
     this.name = name;
     this.age = age;
     this.sex = sex;
