@@ -16,22 +16,10 @@ class Home extends StatelessWidget{
       backgroundColor: Colors.blue,
     ),
     body: Center(
-      child: Image(
-        image: AssetImage('assets/night3.jpg'),
+      child: Image.asset('assets/night.jpg'), 
+      
       ),
      
-     // child: Text(
-      //   'Hello Joginder!',
-      //   style: TextStyle(
-      //     fontSize: 24.0,
-      //     fontWeight: FontWeight.bold,
-      //     letterSpacing: 2.0,
-      //     color: Colors.grey[600],
-      //     fontFamily: 'IndieFlower',
-      //     ),
-
-      ),
-    // ),
     floatingActionButton: FloatingActionButton(
       onPressed: () {
         // Add your onPressed code here!
