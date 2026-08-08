@@ -15,16 +15,11 @@ class Home extends StatelessWidget{
       centerTitle: true,
       backgroundColor: Colors.blue,
     ),
-    body: Center(
-      child: IconButton(
-        icon: Icon(Icons.alarm),
-        color: Colors.blue,
-        iconSize: 50.0,
-        onPressed: () {
-          print('You pressed the button!');
-        },
-    ),
-    
+    body: Container(
+      padding: EdgeInsets.fromLTRB(30.0, 40.0, 30.0, 0.0),
+      margin: EdgeInsets.all(20.0),
+      color: Colors.grey[400],
+      child: Text("Hello"),
     ),
      
     floatingActionButton: FloatingActionButton(
