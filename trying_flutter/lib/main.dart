@@ -16,16 +16,15 @@ class Home extends StatelessWidget{
       backgroundColor: Colors.blue,
     ),
     body: Center(
-      child: ElevatedButton.icon(
+      child: IconButton(
+        icon: Icon(Icons.alarm),
+        color: Colors.blue,
+        iconSize: 50.0,
         onPressed: () {
-          // Add your onPressed code here!
+          print('You pressed the button!');
         },
-        icon: Icon(Icons.mail),
-        label: Text('Click Me'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue,
-        ),
-      ),
+    ),
+    
     ),
      
     floatingActionButton: FloatingActionButton(
