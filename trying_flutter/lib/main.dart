@@ -15,10 +15,21 @@ class Home extends StatelessWidget{
       centerTitle: true,
       backgroundColor: Colors.blue,
     ),
-    body: Padding(
-      padding: EdgeInsets.all(20.0),
-      child: Text('Hello World'),
-   
+    body: Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text('Hello Joginder!'),
+        TextButton(
+          onPressed: () {},
+          child: Text('Click'),
+        ),
+        Container(
+          padding: EdgeInsets.all(20.0),
+          color: Colors.cyanAccent,
+          child: Text('Inside Container'),
+        ),
+      ],
     ),
      
     floatingActionButton: FloatingActionButton(
