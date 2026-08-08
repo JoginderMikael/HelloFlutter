@@ -100,3 +100,20 @@ class NinjaCard extends StatelessWidget{
     );
   }
 }
+
+class Test extends StatefulWidget {
+  const Test({super.key});
+
+  @override
+  _TestState createState() => _TestState();
+}
+
+class _TestState extends State<Test> {
+
+  int counter =1;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
