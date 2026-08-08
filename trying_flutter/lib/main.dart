@@ -15,40 +15,47 @@ class Home extends StatelessWidget{
       centerTitle: true,
       backgroundColor: Colors.blue,
     ),
-    body: Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    body: Row(
       children: <Widget>[
-        Row(
-          children: <Widget>[
-            Text("Hello Joginder"),
-            Text("Hello Second!"),
-          ],
+        Expanded(
+          child: Image.asset("assets/night2.jpg"),
+          flex: 3,
         ),
-        Container(
-          padding: EdgeInsets.all(20.0),
-          color: Colors.purpleAccent,
-          child: Text('One'),
+        Expanded(
+          flex: 3,
+          child:Container(
+            padding: EdgeInsets.all(30.0),
+            color: Colors.cyan,
+            child: Text("1")
+          ),
         ),
-        Container(
-          padding: EdgeInsets.all(20.0),
-          color: Colors.cyanAccent,
-          child: Text('Two'),
+        Expanded(
+          flex: 2,
+          child: Container(
+            padding: EdgeInsets.all(30.0),
+            color: Colors.pink,
+            child: Text("2")
+          ),
         ),
-        Container(
-          padding: EdgeInsets.all(20.0),
-          color: Colors.amber,
-          child: Text('Three'),
-        ),
+        Expanded(
+          flex: 1,
+          child: Container(
+            padding: EdgeInsets.all(30.0),
+            color: Colors.amber,
+            child: Text("3")
+          ),
+        )
       ],
     ),
      
     floatingActionButton: FloatingActionButton(
       onPressed: () {
         // Add your onPressed code here!
+        print('You clicked me!');
       },
-      child: Text('Click'),
+      
       backgroundColor: Colors.blue,
+      child: Text('Click'),
     ),
   );
   }
