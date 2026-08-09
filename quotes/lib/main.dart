@@ -17,7 +17,30 @@ class _QuotesListState extends State<QuotesList> {
     Quote(author: 'Tommy', text: 'Big fucks Small'),
   ];
 
-  Widget quotesTemplate(quote) {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[200],
+      appBar: AppBar(
+        title: Text("Awesome Quotes", style: TextStyle(color: Colors.white)),
+        centerTitle: true,
+        backgroundColor: Colors.redAccent,
+      ),
+      body: Column(
+        children: quotes.map((quote) => QuoteCard(quote: quote)).toList(),
+      ),
+    );
+  }
+}
+
+class QuoteCard extends StatelessWidget {
+
+  final Quote quote;
+
+  const QuoteCard({required this.quote, super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       margin: EdgeInsets.fromLTRB(16.0, 16.0, 0, 0),
       child: Padding(
@@ -36,21 +59,6 @@ class _QuotesListState extends State<QuotesList> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[200],
-      appBar: AppBar(
-        title: Text("Awesome Quotes", style: TextStyle(color: Colors.white)),
-        centerTitle: true,
-        backgroundColor: Colors.redAccent,
-      ),
-      body: Column(
-        children: quotes.map((quote) => quotesTemplate(quote)).toList(),
       ),
     );
   }
