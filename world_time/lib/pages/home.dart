@@ -12,14 +12,18 @@ class  HomeState extends State <Home> {
 Map data = {};
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (data.isEmpty) {
+      data = (ModalRoute.of(context)?.settings.arguments as Map?) ?? {};
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-
-    data = data.isNotEmpty ? data : (ModalRoute.of(context)?.settings.arguments as Map?)?? {};
-    // print(data);
-
     //set background
-    String bgImage = data['isDaytime'] ? 'day.png' : 'night.png';
-    Color bgColor = data['isDaytime'] ? Colors.blue : Colors.indigo.shade700;
+    String bgImage = data['isDaytime'] == true ? 'day.png' : 'night.png';
+    Color bgColor = data['isDaytime'] == true ? Colors.blue : Colors.indigo.shade700;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -27,7 +31,7 @@ Map data = {};
         child: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('/$bgImage'),
+              image: AssetImage('assets/$bgImage'),
               fit:BoxFit.cover,
               )
           ),
