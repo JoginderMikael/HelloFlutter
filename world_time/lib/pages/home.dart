@@ -19,8 +19,10 @@ Map data = {};
 
     //set background
     String bgImage = data['isDaytime'] ? 'day.png' : 'night.png';
+    Color bgColor = data['isDaytime'] ? Colors.blue : Colors.indigo.shade700;
 
     return Scaffold(
+      backgroundColor: bgColor,
       body: SafeArea(
         child: Container(
           decoration: BoxDecoration(
@@ -37,8 +39,17 @@ Map data = {};
                   onPressed: (){
                     Navigator.pushNamed(context, '/location');
                   }, 
-                  icon: Icon(Icons.edit_location),
-                  label: Text('Edit Location'),
+                  icon: Icon(
+                    Icons.edit_location,
+                    color: Colors.grey.shade300,
+
+                    ),
+                  label: Text(
+                    'Edit Location',
+                    style: TextStyle(
+                      color: Colors.grey.shade300,
+                    ),
+                    ),
                   ),
                   SizedBox(height: 20.0),
                   Row(
@@ -49,6 +60,7 @@ Map data = {};
                         style: TextStyle(
                           fontSize: 28.0,
                           letterSpacing: 2.0,
+                          color: Colors.white,
                         ),
                       ),
                     ],
@@ -58,6 +70,7 @@ Map data = {};
                     data['time'],
                     style: TextStyle(
                       fontSize: 66.0,
+                      color: Colors.white,
                     ),
                   )
               ],
