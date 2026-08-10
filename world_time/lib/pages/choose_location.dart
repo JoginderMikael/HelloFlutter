@@ -11,16 +11,16 @@ class _ChooseLocationState extends State<ChooseLocation> {
 
   void getData() async{
     //simulate network request for username
-    await Future.delayed(Duration(seconds: 3), (){
-      print('Joginder');
+  String name = await Future.delayed(Duration(seconds: 3), (){
+      return 'Joginder';
     });
 
-    await Future.delayed(Duration(seconds: 2), (){
-      print('This is jog');
+  String bio = await Future.delayed(Duration(seconds: 2), (){
+      return 'He is a good Man';
     });
 
 
-    print('Statement');
+    print('$name - $bio');
   }
   // int counter = 0;
 
@@ -32,6 +32,7 @@ class _ChooseLocationState extends State<ChooseLocation> {
     super.initState();
     // print('initState function ran');
     getData();
+    print('Hey there');
 }
 
   @override
