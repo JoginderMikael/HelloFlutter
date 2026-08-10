@@ -9,9 +9,7 @@ class ChooseLocation extends StatefulWidget {
 }
 
 class _ChooseLocationState extends State<ChooseLocation> {
-
-
-  List<WorldTime> locations = [
+  final List<WorldTime> locations = [
     WorldTime(url: 'Europe/London', location: 'London', flag: 'uk.png'),
     WorldTime(url: 'Europe/Berlin', location: 'Athens', flag: 'greece.png'),
     WorldTime(url: 'Africa/Cairo', location: 'Cairo', flag: 'egypt.png'),
@@ -22,16 +20,22 @@ class _ChooseLocationState extends State<ChooseLocation> {
     WorldTime(url: 'Asia/Jakarta', location: 'Jakarta', flag: 'indonesia.png'),
   ];
 
-  void updateTime(index) async{
-    WorldTime instance = locations[index];
+  Future<void> updateTime(int index) async {
+    final WorldTime instance = locations[index];
 
     await instance.getTime();
 
+    if (!mounted) return;
+
     Navigator.pop(context, {
-        'location': instance.location,
-        'flag': instance.flag,
-        'time': instance.time,
-        'isDaytime': instance.isDaytime
+      'location': instance.location,
+      'flag': instance.flag,
+      'time': instance.formattedTime,
+      'date': instance.date,
+      'dayOfWeek': instance.dayOfWeek,
+      'timezone': instance.timezone,
+      'dateTime': instance.dateTime,
+      'isDaytime': instance.isDaytime,
     });
   }
 
