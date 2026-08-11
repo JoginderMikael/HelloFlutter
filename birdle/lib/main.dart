@@ -73,7 +73,7 @@ class GamePage extends StatelessWidget {
             Row(
               spacing: 5.0,
               children: [
-
+                for(final letter in guess) Tile(letter.char, letter.type)
               ]
             ),
         ],
