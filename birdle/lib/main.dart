@@ -76,6 +76,11 @@ class GamePage extends StatelessWidget {
                 for(final letter in guess) Tile(letter.char, letter.type)
               ]
             ),
+            GuessInput(
+              onSubmitGuess: (guess){
+                print(guess);
+              }
+            ),
         ],
       ),
     );
@@ -87,6 +92,14 @@ class GuessInput extends StatelessWidget{
 
   final void Function(String) onSubmitGuess;
   final TextEditingController _textEditingController = TextEditingController();
+
+  final FocusNode _focusNode = FocusNode();
+
+  void _onSubmit(){
+    onSubmitGuess(_textEditingController.text);
+    _textEditingController.clear();
+    _focusNode.requestFocus();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,13 +117,19 @@ class GuessInput extends StatelessWidget{
                 ),
               ),
               controller: _textEditingController,
-              onSubmitted: (input) {
-                print(_textEditingController.text);
-                _textEditingController.clear();
+              onSubmitted: (value) {
+                _onSubmit();
               },
             ),
           ),
         ),
+        IconButton(
+          padding: EdgeInsets.zero,
+          icon: const Icon(Icons.arrow_circle_up),
+          onPressed: (){
+            _onSubmit();
+          }
+          ),
       ],
     );
   }
