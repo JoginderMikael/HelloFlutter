@@ -133,7 +133,16 @@ class Game {
   /// For finer control, use [isLegalGuess] to validate input or
   /// [matchGuessOnly] to evaluate without recording the result.
   Word guess(String guess) {
-    final result = matchGuessOnly(guess);
+    final normalizedGuess = guess.trim().toLowerCase();
+    if (!isLegalGuess(normalizedGuess)) {
+      return Word.empty();
+    }
+
+    final result = matchGuessOnly(normalizedGuess);
+    if (result.isEmpty) {
+      return Word.empty();
+    }
+
     addGuessToList(result);
     return result;
   }
@@ -142,11 +151,22 @@ class Game {
   ///
   /// UIs can call this method before [guess] to
   /// show players a message when they enter an invalid word.
-  bool isLegalGuess(String guess) => Word.fromString(guess).isLegalGuess;
+  bool isLegalGuess(String guess) {
+    final normalizedGuess = guess.trim().toLowerCase();
+    if (normalizedGuess.length != 5) return false;
+    final word = Word.fromString(normalizedGuess);
+    return word.isLegalGuess;
+  }
 
   /// Evaluates [guess] against the hidden word without advancing the game.
-  Word matchGuessOnly(String guess) =>
-      Word.fromString(guess).evaluateGuess(_wordToGuess);
+  Word matchGuessOnly(String guess) {
+    final normalizedGuess = guess.trim().toLowerCase();
+    if (!isLegalGuess(normalizedGuess)) {
+      return Word.empty();
+    }
+
+    return Word.fromString(normalizedGuess).evaluateGuess(_wordToGuess);
+  }
 
   /// Stores [guess] in the next empty slot of [guesses].
   void addGuessToList(Word guess) {

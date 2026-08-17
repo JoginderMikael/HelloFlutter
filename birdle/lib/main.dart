@@ -34,7 +34,9 @@ class Tile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedContainer(
+      duration: Duration(microseconds: 500),
+      curve: Curves.bounceIn,
       width: 60,
       height: 60,
       decoration: BoxDecoration(
@@ -82,8 +84,10 @@ class _GamePageState extends State<GamePage> {
               ]
             ),
             GuessInput(
-              onSubmitGuess: (guess){
-                print(guess);
+              onSubmitGuess: (String guess){
+                setState(() {
+                  _game.guess(guess);
+                });
               }
             ),
         ],
@@ -100,8 +104,14 @@ class GuessInput extends StatelessWidget{
 
   final FocusNode _focusNode = FocusNode();
 
-  void _onSubmit(){
-    onSubmitGuess(_textEditingController.text);
+  void _onSubmit() {
+    final submittedGuess = _textEditingController.text.trim();
+    if (submittedGuess.isEmpty) {
+      _textEditingController.clear();
+      return;
+    }
+
+    onSubmitGuess(submittedGuess);
     _textEditingController.clear();
     _focusNode.requestFocus();
   }
