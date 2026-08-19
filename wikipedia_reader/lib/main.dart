@@ -15,16 +15,7 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    final viewModel = ArticleViewModel(ArticleModel());
-
-
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Wikipedia Flutter')),
-        body: const Center(child: Text('Check Console for article data')),
-      ),
-    );
+    return const MaterialApp(home: ArticleView());
   }
 }
 
@@ -75,4 +66,47 @@ Future<void> fetchArticle() async{
   notifyListeners();
 }
 
+}
+
+class ArticleView extends StatefulWidget {
+  const ArticleView({super.key});
+
+  @override
+  State<ArticleView> createState() => _ArticleViewState();
+}
+
+class _ArticleViewState extends State<ArticleView> {
+  final ArticleViewModel viewModel = ArticleViewModel(ArticleModel()); 
+  
+  @override
+  void initState(){
+    super.initState();
+    viewModel.fetchArticle();
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Wikipedia Flutter')),
+      body: ListenableBuilder(
+        listenable: viewModel, 
+        builder: (context, _){
+          return switch((
+            viewModel.isLoading, 
+            viewModel.summary,
+            viewModel.error
+            )) {
+              (true, _, _) => const CircularProgressIndicator(),
+              (_, _, final Exception e) => Text("Error: $e"),
+              (_, final summary?, _) => ArticlePage(
+                summary: summary, 
+                nextArticleCallback : viewModel.fetchArticle(),
+              ),
+              _ => const Text('something went wrong',)
+            };
+        },
+      ),
+    );
+  }
 }
