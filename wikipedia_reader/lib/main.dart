@@ -1,73 +1,97 @@
+// Converts the JSON text returned by the Wikipedia API into Dart objects.
 import 'dart:convert';
+// Provides HttpException, which we use when the API request fails.
 import 'dart:io';
 
+// Flutter's Material Design widgets, such as Scaffold, AppBar, and Text.
 import 'package:flutter/material.dart';
+// The http package provides the get() function for making web requests.
 import 'package:http/http.dart';
 
+// Our own model class that knows how to read a Wikipedia summary from JSON.
 import 'summary.dart';
 
+// Every Flutter app starts by calling runApp with its root widget.
 void main() {
   runApp(const MainApp());
 }
 
+// StatelessWidget means this widget does not store changing UI state itself.
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // MaterialApp sets up common Flutter app behavior and visual styling.
+    // ArticleView is the first screen shown to the user.
     return const MaterialApp(home: ArticleView());
   }
 }
 
-class ArticleModel{
-  Future<Summary> getRandomArticleSummary() async{
+// The model is responsible for getting data. Keeping API code here prevents
+// the widgets from needing to know how Wikipedia's web service works.
+class ArticleModel {
+  Future<Summary> getRandomArticleSummary() async {
+    // Uri.https safely builds this URL from a host and a path.
     final uri = Uri.https(
       'en.wikipedia.org',
       '/api/rest_v1/page/random/summary',
     );
 
+    // await pauses this method until Wikipedia sends back a response.
     final response = await get(uri);
 
-    if(response.statusCode != 200){
+    // HTTP status code 200 means the request succeeded.
+    if (response.statusCode != 200) {
       throw const HttpException('Failed to update resource');
     }
 
+    // The response body is JSON text. jsonDecode turns it into a Map, which
+    // Summary.fromJson then converts into our strongly typed Summary object.
     return Summary.fromJson(jsonDecode(response.body) as Map<String, Object?>);
   }
 }
 
-
-class ArticleViewModel extends ChangeNotifier{
+// ChangeNotifier can notify widgets when its data changes. This class holds
+// the current article, loading state, and any error from the API request.
+class ArticleViewModel extends ChangeNotifier {
   final ArticleModel model;
+  // ? means these values are allowed to be null because they may not exist yet.
   Summary? summary;
   Exception? error;
   bool isLoading = false;
 
-
-  ArticleViewModel(this.model){
+  ArticleViewModel(this.model) {
+    // Start loading an article when the view model is created.
     fetchArticle();
   }
 
-Future<void> fetchArticle() async{
-  isLoading = true;
-  notifyListeners();
+  Future<void> fetchArticle() async {
+    // Tell the UI to show a loading indicator before starting the request.
+    isLoading = true;
+    notifyListeners();
 
-  try{
-    summary = await model.getRandomArticleSummary();
-    print('Article loaded: ${summary!.titles.normalized}');
-    error = null;
-  } on HttpException catch(e){
-    print('Error loading article: ${e.message}');
-    error = e;
-    summary = null;
+    try {
+      summary = await model.getRandomArticleSummary();
+      // ! is the null-assertion operator. At this point the request succeeded,
+      // so summary is expected to contain an article.
+      // print('Article loaded: ${summary!.titles.normalized}');
+      error = null;
+    } on HttpException catch (e) {
+      // If the request fails, save the exception so the UI can display it.
+      // print('Error loading article: ${e.message}');
+      error = e;
+      summary = null;
+    }
+
+    // The request is finished, so the UI can stop showing the spinner and
+    // display either the article or the error.
+    isLoading = false;
+    notifyListeners();
   }
-
-  isLoading = false;
-  notifyListeners();
 }
 
-}
-
+// StatefulWidget is used because this screen observes changing article data.
 class ArticleView extends StatefulWidget {
   const ArticleView({super.key});
 
@@ -76,71 +100,83 @@ class ArticleView extends StatefulWidget {
 }
 
 class _ArticleViewState extends State<ArticleView> {
-  final ArticleViewModel viewModel = ArticleViewModel(ArticleModel()); 
-  
+  final ArticleViewModel viewModel = ArticleViewModel(ArticleModel());
+
   @override
-  void initState(){
+  void initState() {
     super.initState();
+    // initState runs once when this screen is inserted into the widget tree.
     viewModel.fetchArticle();
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Wikipedia Flutter')),
+      // ListenableBuilder rebuilds its contents whenever viewModel calls
+      // notifyListeners(). This keeps the screen synchronized with the data.
       body: ListenableBuilder(
-        listenable: viewModel, 
-        builder: (context, _){
-          return switch((
-            viewModel.isLoading, 
+        listenable: viewModel,
+        builder: (context, _) {
+          // Pattern matching chooses which UI to show based on three values:
+          // loading state, article data, and error data.
+          return switch ((
+            viewModel.isLoading,
             viewModel.summary,
-            viewModel.error
-            )) {
-              (true, _, _) => const CircularProgressIndicator(),
-              (_, _, final Exception e) => Text("Error: $e"),
-              (_, final summary?, _) => ArticlePage(
-                summary: summary, 
-                nextArticleCallback : viewModel.fetchArticle,
-              ),
-              _ => const Text('something went wrong',)
-            };
+            viewModel.error,
+          )) {
+            // _ means "any value"; while loading, show a spinner.
+            (true, _, _) => const CircularProgressIndicator(),
+            // If there is an exception, show its message.
+            (_, _, final Exception e) => Text("Error: $e"),
+            // summary? matches a non-null Summary and unwraps it into summary.
+            (_, final summary?, _) => ArticlePage(
+              summary: summary,
+              nextArticleCallback: viewModel.fetchArticle,
+            ),
+            // A fallback for an unexpected combination of states.
+            _ => const Text('something went wrong'),
+          };
         },
       ),
     );
   }
 }
 
+// This widget lays out the current article and the button for loading another.
+// It is stateless because the changing data is owned by ArticleViewModel.
 class ArticlePage extends StatelessWidget {
-  
   const ArticlePage({
     super.key,
-    required this.summary, 
+    required this.summary,
     required this.nextArticleCallback,
-    });
+  });
 
-    final Summary summary;
-    final VoidCallback nextArticleCallback;
-
-
+  final Summary summary;
+  // VoidCallback is a function that takes no arguments and returns nothing.
+  final VoidCallback nextArticleCallback;
 
   @override
   Widget build(BuildContext context) {
+    // SingleChildScrollView allows long article text to be scrolled vertically.
     return SingleChildScrollView(
       child: Column(
         children: [
           ArticleWidget(summary: summary),
           ElevatedButton(
-            onPressed: nextArticleCallback, 
-            child: Text('Next random article')
-            )
+            // Pass the callback without parentheses. Flutter calls it when
+            // the user taps the button.
+            onPressed: nextArticleCallback,
+            child: Text('Next random article'),
+          ),
         ],
       ),
     );
   }
 }
 
-
+// Displays the individual pieces of an article: image, title, description,
+// and the main extract text.
 class ArticleWidget extends StatelessWidget {
   const ArticleWidget({super.key, required this.summary});
 
@@ -151,23 +187,29 @@ class ArticleWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Column(
+        // Add space between the widgets in this column.
         spacing: 10,
         children: [
-          if(summary.hasImage) Image.network(summary.originalImage!.source),
+          // The image is only created when the article contains an image.
+          if (summary.hasImage) Image.network(summary.originalImage!.source),
           Text(
             summary.titles.normalized,
+            // Show an ellipsis if the title is too long for its space.
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.displaySmall,
           ),
-          if(summary.description != null)
+          // The description is optional, so only show it when it is not null.
+          if (summary.description != null)
             Text(
+              // ! is safe here because the condition above confirmed it exists.
               summary.description!,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall,
             ),
-            Text(summary.extract),
-          ],
+          // The extract is the main summary text returned by Wikipedia.
+          Text(summary.extract),
+        ],
       ),
-      );
+    );
   }
 }
