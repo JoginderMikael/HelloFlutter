@@ -22,9 +22,18 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // MaterialApp sets up common Flutter app behavior and visual styling.
-    // ArticleView is the first screen shown to the user.
-    return const MaterialApp(home: ArticleView());
+    // Material 3 gives the app modern components, spacing, and typography.
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF6750A4),
+          brightness: Brightness.light,
+        ),
+        useMaterial3: true,
+      ),
+      home: const ArticleView(),
+    );
   }
 }
 
@@ -111,8 +120,33 @@ class _ArticleViewState extends State<ArticleView> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Wikipedia Flutter')),
+      backgroundColor: colorScheme.surface,
+      appBar: AppBar(
+        backgroundColor: colorScheme.surface,
+        surfaceTintColor: Colors.transparent,
+        titleSpacing: 24,
+        title: Row(
+          children: [
+            Icon(Icons.menu_book_rounded, color: colorScheme.primary),
+            const SizedBox(width: 10),
+            const Text(
+              'WikiDiscover',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            tooltip: 'Load another article',
+            onPressed: viewModel.isLoading ? null : viewModel.fetchArticle,
+            icon: const Icon(Icons.refresh_rounded),
+          ),
+          const SizedBox(width: 12),
+        ],
+      ),
       // ListenableBuilder rebuilds its contents whenever viewModel calls
       // notifyListeners(). This keeps the screen synchronized with the data.
       body: ListenableBuilder(
@@ -125,10 +159,13 @@ class _ArticleViewState extends State<ArticleView> {
             viewModel.summary,
             viewModel.error,
           )) {
-            // _ means "any value"; while loading, show a spinner.
-            (true, _, _) => const CircularProgressIndicator(),
-            // If there is an exception, show its message.
-            (_, _, final Exception e) => Text("Error: $e"),
+            // _ means "any value"; while loading, show a centered spinner.
+            (true, _, _) => const _LoadingView(),
+            // If there is an exception, show a friendly recovery message.
+            (_, _, final Exception e) => _ErrorView(
+              error: e,
+              onRetry: viewModel.fetchArticle,
+            ),
             // summary? matches a non-null Summary and unwraps it into summary.
             (_, final summary?, _) => ArticlePage(
               summary: summary,
@@ -158,18 +195,151 @@ class ArticlePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // SingleChildScrollView allows long article text to be scrolled vertically.
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          ArticleWidget(summary: summary),
-          ElevatedButton(
-            // Pass the callback without parentheses. Flutter calls it when
-            // the user taps the button.
-            onPressed: nextArticleCallback,
-            child: Text('Next random article'),
+    // LayoutBuilder lets the page use more width on a desktop browser while
+    // keeping the reading column comfortable on larger screens.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final contentWidth = constraints.maxWidth > 820
+            ? 760.0
+            : constraints.maxWidth;
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+          child: Center(
+            child: SizedBox(
+              width: contentWidth,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _PageIntro(summary: summary),
+                  const SizedBox(height: 20),
+                  ArticleWidget(summary: summary),
+                  const SizedBox(height: 24),
+                  FilledButton.icon(
+                    // Pass the callback without parentheses. Flutter calls it
+                    // when the user taps the button.
+                    onPressed: nextArticleCallback,
+                    icon: const Icon(Icons.auto_awesome_rounded),
+                    label: const Text('Discover another article'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _PageIntro extends StatelessWidget {
+  const _PageIntro({required this.summary});
+
+  final Summary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'A moment of discovery',
+          style: textTheme.labelLarge?.copyWith(
+            color: Theme.of(context).colorScheme.primary,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          summary.titles.normalized,
+          style: textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+            height: 1.1,
+          ),
+        ),
+        if (summary.description != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            summary.description!,
+            style: textTheme.titleMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              height: 1.4,
+            ),
           ),
         ],
+      ],
+    );
+  }
+}
+
+class _LoadingView extends StatelessWidget {
+  const _LoadingView();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(48),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Finding something interesting…',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ErrorView extends StatelessWidget {
+  const _ErrorView({required this.error, required this.onRetry});
+
+  final Exception error;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.cloud_off_rounded, size: 56, color: colorScheme.error),
+            const SizedBox(height: 16),
+            Text(
+              'We couldn’t load an article',
+              textAlign: TextAlign.center,
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Check your connection and try again.\n$error',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: colorScheme.onSurfaceVariant),
+            ),
+            const SizedBox(height: 20),
+            FilledButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Try again'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -184,31 +354,56 @@ class ArticleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
-      padding: const EdgeInsets.all(8),
-      child: Column(
-        // Add space between the widgets in this column.
-        spacing: 10,
-        children: [
-          // The image is only created when the article contains an image.
-          if (summary.hasImage) Image.network(summary.originalImage!.source),
-          Text(
-            summary.titles.normalized,
-            // Show an ellipsis if the title is too long for its space.
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.displaySmall,
-          ),
-          // The description is optional, so only show it when it is not null.
-          if (summary.description != null)
-            Text(
-              // ! is safe here because the condition above confirmed it exists.
-              summary.description!,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall,
+      padding: EdgeInsets.zero,
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        elevation: 0,
+        color: colorScheme.surfaceContainerLowest,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28),
+          side: BorderSide(color: colorScheme.outlineVariant),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // The image is only created when the article contains an image.
+            if (summary.hasImage)
+              AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Image.network(
+                  summary.originalImage!.source,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, progress) {
+                    if (progress == null) return child;
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: colorScheme.surfaceContainerHighest,
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.image_not_supported_outlined,
+                      size: 48,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 26),
+              child: Text(
+                // The extract is the main summary text returned by Wikipedia.
+                summary.extract,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  height: 1.65,
+                ),
+              ),
             ),
-          // The extract is the main summary text returned by Wikipedia.
-          Text(summary.extract),
-        ],
+          ],
+        ),
       ),
     );
   }
