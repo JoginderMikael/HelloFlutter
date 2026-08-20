@@ -1,4 +1,5 @@
 // Converts the JSON text returned by the Wikipedia API into Dart objects.
+import 'dart:async';
 import 'dart:convert';
 // Provides HttpException, which we use when the API request fails.
 import 'dart:io';
@@ -48,7 +49,7 @@ class ArticleModel {
     );
 
     // await pauses this method until Wikipedia sends back a response.
-    final response = await get(uri);
+    final response = await get(uri).timeout(const Duration(seconds: 15));
 
     // HTTP status code 200 means the request succeeded.
     if (response.statusCode != 200) {
@@ -70,10 +71,7 @@ class ArticleViewModel extends ChangeNotifier {
   Exception? error;
   bool isLoading = false;
 
-  ArticleViewModel(this.model) {
-    // Start loading an article when the view model is created.
-    fetchArticle();
-  }
+  ArticleViewModel(this.model);
 
   Future<void> fetchArticle() async {
     // Tell the UI to show a loading indicator before starting the request.
@@ -86,17 +84,16 @@ class ArticleViewModel extends ChangeNotifier {
       // so summary is expected to contain an article.
       // print('Article loaded: ${summary!.titles.normalized}');
       error = null;
-    } on HttpException catch (e) {
-      // If the request fails, save the exception so the UI can display it.
-      // print('Error loading article: ${e.message}');
+    } on Exception catch (e) {
+      // Network, timeout, HTTP, and JSON errors should all be recoverable.
       error = e;
       summary = null;
+    } finally {
+      // Always leave the loading state, even when the phone is offline or the
+      // request times out.
+      isLoading = false;
+      notifyListeners();
     }
-
-    // The request is finished, so the UI can stop showing the spinner and
-    // display either the article or the error.
-    isLoading = false;
-    notifyListeners();
   }
 }
 
@@ -116,6 +113,12 @@ class _ArticleViewState extends State<ArticleView> {
     super.initState();
     // initState runs once when this screen is inserted into the widget tree.
     viewModel.fetchArticle();
+  }
+
+  @override
+  void dispose() {
+    viewModel.dispose();
+    super.dispose();
   }
 
   @override
