@@ -1,0 +1,31 @@
+# Flutter and Dart generated files
+**/.dart_tool/
+**/build/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/coverage/
+**/pubspec_overrides.yaml
+
+# IDE and local machine files
+**/.idea/
+**/*.iml
+**/.vscode/
+.DS_Store
+Thumbs.db
+
+# Platform-generated local configuration and native build files
+**/android/.gradle/
+**/android/local.properties
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+**/ios/Flutter/.last_build_id
+**/linux/flutter/ephemeral/
+**/macos/Flutter/ephemeral/
+**/windows/flutter/ephemeral/
+
+# Local tutorial prompts and agent-generated skills
+**/prompt.txt
+**/.agents/
+**/skills-lock.json

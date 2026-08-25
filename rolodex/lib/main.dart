@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
-import 'package:rolodex/screens/adaptive_layout.dart';
 
 import 'data/contact_group.dart';
+import 'screens/adaptive_layout.dart';
 
 final contactGroupsModel = ContactGroupsModel();
 
